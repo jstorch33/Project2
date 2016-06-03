@@ -34,13 +34,14 @@ private[sql] sealed trait DiskHashedRelation {
   */
 protected [sql] final class GeneralDiskHashedRelation(partitions: Array[DiskPartition])
   extends DiskHashedRelation with Serializable {
+  val
 
   override def getIterator() = {
-    partitionArray.toIterator
+    partitions.toIterator
   }
 
   override def closeAllPartitions() = {
-    for (i <- partitionArray)
+    for (i <- partitions)
     {
       i.closePartition()
     }
@@ -71,7 +72,7 @@ private[sql] class DiskPartition (
     }
 
     //if arraylist is larger then blocksize, spill to disk then clear data
-    if (measurePartitionSize() + CS143Utils.getRowSize(row) > blockSize)
+    if (measurePartitionSize() + CS143Utils.getRowSize(row).size > blockSize)
     {
       spillPartitionToDisk()
       data.clear()
@@ -127,7 +128,7 @@ private[sql] class DiskPartition (
           else
           {
             currentIterator = getListFromBytes(byteArray).iterator.asScala
-            chunkSizeIterator.next()
+            chunkSizeIterator.next
           }
         }
         else
