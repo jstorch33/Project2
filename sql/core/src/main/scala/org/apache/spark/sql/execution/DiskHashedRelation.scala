@@ -127,7 +127,7 @@ private[sql] class DiskPartition (
           else
           {
             currentIterator = getListFromBytes(byteArray).iterator.asScala
-            chunkSizeIterator.next
+            currentIterator.next
           }
         }
         else
