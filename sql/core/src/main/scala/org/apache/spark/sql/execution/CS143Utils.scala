@@ -121,8 +121,13 @@ def getRowSize(data: Row): Array[Byte] = {
    * @return
    */
   def getUdfFromExpressions(expressions: Seq[Expression]): ScalaUdf = {
-    // IMPLEMENT ME
-    null
+    var newUdf : ScalaUdf = null
+
+    for(x <- expressions)
+      if(x.isInstanceOf[ScalaUdf])
+        newUdf = x.asInstanceOf[ScalaUdf]
+
+    newUdf
   }
 
   /**
@@ -204,13 +209,26 @@ object CachingIteratorGenerator {
         val cache: JavaHashMap[Row, Row] = new JavaHashMap[Row, Row]()
 
         def hasNext() = {
-          // IMPLEMENT ME
-          false
+          input.hasNext
         }
 
         def next() = {
-          // IMPLEMENT ME
-          null
+          if(!input.hasNext)
+            null
+
+          val inputRow: Row = input.next()
+          val udfCachekey: Row = cacheKeyProjection.apply(inputRow)
+          val udfRes: Row = {
+            if (cache.containsKey(udfCachekey)) {
+              cache.get(udfCachekey)
+            } else {
+              val x: Row = udfProject.apply(inputRow)
+              cache.put(udfCachekey, x)
+              x
+            }
+          }
+
+          Row.fromSeq(preUdfProjection.apply(inputRow) ++ udfProj ++ postUdfProjection.apply(inputRow))
         }
       }
     }
