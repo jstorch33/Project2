@@ -36,11 +36,11 @@ protected [sql] final class GeneralDiskHashedRelation(partitions: Array[DiskPart
   extends DiskHashedRelation with Serializable {
 
   override def getIterator() = {
-    diskPartitionArray.toIterator
+    partitionArray.toIterator
   }
 
   override def closeAllPartitions() = {
-    for (i <- diskPartitionArray)
+    for (i <- partitionArray)
     {
       i.closePartition()
     }
@@ -127,7 +127,7 @@ private[sql] class DiskPartition (
           else
           {
             currentIterator = getListFromBytes(byteArray).iterator.asScala
-            chunkSizeIterator.next
+            chunkSizeIterator.next()
           }
         }
         else
@@ -152,7 +152,7 @@ private[sql] class DiskPartition (
         {
           false
         }
-        byteArray = CS143Utils.getNextChunckBytes(inStream, chunkSizeIterator.next(), byteArray)
+        byteArray = CS143Utils.getNextChunkBytes(inStream, chunkSizeIterator.next(), byteArray)
         true
       }
     }
