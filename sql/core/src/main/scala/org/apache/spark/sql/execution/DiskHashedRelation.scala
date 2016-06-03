@@ -34,7 +34,6 @@ private[sql] sealed trait DiskHashedRelation {
   */
 protected [sql] final class GeneralDiskHashedRelation(partitions: Array[DiskPartition])
   extends DiskHashedRelation with Serializable {
-  val
 
   override def getIterator() = {
     partitions.toIterator
