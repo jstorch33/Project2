@@ -129,11 +129,11 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
 
       private def fetchNextPartition(): Boolean  = {
         // IMPLEMENT ME
-        var result: Boolean = diskPartitionsIterator.hasNext
+        var result: Boolean = disk_partition_iterator.hasNext
 
         if (result) {
-          partitionIterator = diskPartitionsIterator.next().getData()
-          currentIterator = CS143Utils.generateCachingIterator(projectList, child.output)(partitionIterator)
+          disk_partition_iterator = disk_partition_iterator.next().getData()
+          current_iterator = CS143Utils.generateCachingIterator(projectList, child.output)(disk_partition_iterator)
         }
 
         result
