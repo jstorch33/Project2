@@ -142,13 +142,13 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
         * @return
         */
       private def fetchNextPartition(): Boolean = {
-        if(relationIter.hasNext){
+        if(disk_partition_iterator.hasNext){
           //Generate caching iterator for data of partition
-          cacheIter = CS143Utils.generateCachingIterator(projectList, child.output)
-          partitionIter = cacheIter(relationIter.next().getData())
+          cache_generator = CS143Utils.generateCachingIterator(projectList, child.output)
+          disk_partition = cache_generator(disk_partition_iterator.next().getData())
 
           //If the partition has stuff, true, otherwise move on
-          if(partitionIter.hasNext)
+          if(disk_partition.hasNext)
             true
           else
             false
