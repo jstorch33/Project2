@@ -73,6 +73,76 @@ case class CacheProject(projectList: Seq[Expression], child: SparkPlan) extends 
 
 
 /**
+  * This method takes an iterator as an input. It should first partition the whole input to disk.
+  * It should then read each partition from disk and construct do in-memory memoization over each
+  * partition to avoid recomputation of UDFs.
+  *
+  * @param input the input iterator
+  * @return the result of applying the projection
+  */
+def generateIterator(input: Iterator[Row]): Iterator[Row] = {
+  // This is the key generator for the course-grained external hashing.
+  val keyGenerator = CS143Utils.getNewProjection(projectList, child.output)
+
+  // This essentially follows the DiskPartition.getData pattern
+  new Iterator[Row] {
+    var currentIterator: Iterator[Row] = null
+
+    // Note: here we use the default number of partitions and default blockSize
+    val diskPartitionIterator = DiskHashedRelation(input, keyGenerator).getIterator()
+    var diskPartition: DiskPartition = null
+    var cacheGenerator: (Iterator[Row] => Iterator[Row]) = null
+
+    def hasNext() = {
+      if (currentIterator == null) {
+        fetchNextPartition()
+      } else {
+        if (currentIterator.hasNext) {
+          true
+        } else {
+          fetchNextPartition()
+        }
+      }
+    }
+
+    def next() = {
+      if (hasNext) {
+        currentIterator.next()
+      } else {
+        null
+      }
+    }
+
+    /**
+      * This fetches the next partition over which we will iterate or returns false if there are no more partitions
+      * over which we can iterate.
+      *
+      * @return
+      */
+    private def fetchNextPartition(): Boolean = {
+     // Note: even if there's a next partition, doesn't mean that we'll data on it
+      while (diskPartitionIterator.hasNext) {
+      diskPartition = diskPartitionIterator.next()
+      // Note: we should regenerate the cacheGenerator each time we fetch a new partition, in case the HashMap inside cacheGenerator won't fit in memory
+      cacheGenerator = CS143Utils.generateCachingIterator(projectList, child.output)
+      currentIterator = cacheGenerator(diskPartition.getData())
+        if (currentIterator.hasNext) {
+          return true
+        }
+      }
+      false
+    }
+  }
+}
+
+}
+
+
+
+
+
+/*
+/**
   * A projection operator that is tailor to improve performance of UDF execution by using
   * external hashing.
   *
@@ -117,22 +187,6 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
         }
       }
 
-      /*
-      def hasNext() = {
-        if (current_iterator.hasNext) {
-          true
-        }
-        else if (current_iterator == null) {
-          fetchNextPartition() //if there is a next partition it will return true, else false
-        }
-        else //if it gets here, must go to the next partition as well
-        {
-          fetchNextPartition() //if there is a next partition it will return true, else false
-        }
-        false
-      }
-*/
-
 
       def next() = {
         if(hasNext)
@@ -140,21 +194,6 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
         null
       }
 
-      private def fetchNextPartition(): Boolean = {
-        // Note: even if there's a next partition, doesn't mean that we'll data on it
-        while (disk_partition_iterator.hasNext) {
-          disk_partition = disk_partition_iterator.next()
-          // Note: we should regenerate the cacheGenerator each time we fetch a new partition, in case the HashMap inside cacheGenerator won't fit in memory
-          cache_generator = CS143Utils.generateCachingIterator(projectList, child.output)
-          current_iterator = cache_generator(disk_partition.getData())
-          if (current_iterator.hasNext) {
-            return true
-          }
-        }
-        false
-      }
-
-/*
       /**
         * This fetches the next partition over which we will iterate or returns false if there are no more partitions
         * over which we can iterate.
@@ -181,11 +220,11 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
         }
         false
       }
-      */
+
     }
   }
 }
-
+*/
 
 
 /**
