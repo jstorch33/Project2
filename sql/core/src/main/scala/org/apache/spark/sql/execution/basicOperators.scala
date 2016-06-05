@@ -106,10 +106,10 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
       var cache_generator: (Iterator[Row] => Iterator[Row]) = null
 
       def hasNext() = {
-        if (currentIterator == null) {
+        if (current_iterator == null) {
           fetchNextPartition()
         } else {
-          if (currentIterator.hasNext) {
+          if (current_iterator.hasNext) {
             true
           } else {
             fetchNextPartition()
