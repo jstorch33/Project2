@@ -139,7 +139,7 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
         }
         else   //otherwise there is a next partition
         {
-          while(disk_partition_iterator.hasNext    //i want to change this code more
+          while(disk_partition_iterator.hasNext)    //i want to change this code more
           {
             disk_partition = disk_partition_iterator.next()
             cache_generator = CS143Utils.generateCachingIterator(projectList, child.output)
