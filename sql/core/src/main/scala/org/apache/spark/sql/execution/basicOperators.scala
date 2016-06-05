@@ -139,7 +139,7 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
           current_iterator.next()  //if hasNext, set it to next
         null
       }
-/*
+
       private def fetchNextPartition(): Boolean = {
         // Note: even if there's a next partition, doesn't mean that we'll data on it
         while (disk_partition_iterator.hasNext) {
@@ -153,8 +153,8 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
         }
         false
       }
-*/
 
+/*
       /**
         * This fetches the next partition over which we will iterate or returns false if there are no more partitions
         * over which we can iterate.
@@ -181,6 +181,7 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
         }
         false
       }
+      */
     }
   }
 }
