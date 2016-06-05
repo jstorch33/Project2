@@ -135,7 +135,7 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
 
 
       def next() = {
-        if(hasNext())
+        if(hasNext)
           current_iterator.next()  //if hasNext, set it to next
         null
       }
