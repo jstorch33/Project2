@@ -150,7 +150,8 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
             return true
           }
         }
-        false
+        if(!disk_partition_iterator.hasNext)
+          false
       }
     }
   }
