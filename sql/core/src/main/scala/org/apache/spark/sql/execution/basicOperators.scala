@@ -138,14 +138,21 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
         * @return
         */
       private def fetchNextPartition(): Boolean = {
-        // Note: even if there's a next partition, doesn't mean that we'll data on it
-        while (diskPartitionIterator.hasNext) {
-          diskPartition = diskPartitionIterator.next()
-          // Note: we should regenerate the cacheGenerator each time we fetch a new partition, in case the HashMap inside cacheGenerator won't fit in memory
-          cacheGenerator = CS143Utils.generateCachingIterator(projectList, child.output)
-          current_iterator = cacheGenerator(diskPartition.getData())
-          if (current_iterator.hasNext) {
-            return true
+        if(!disk_partition_iterator.hasNext)
+        {
+          false
+        }
+        else   //otherwise there is a next partition
+        {
+          while(disk_partition_iterator.hasNext)    //i want to change this code more
+          {
+            disk_partition = disk_partition_iterator.next()
+            cache_generator = CS143Utils.generateCachingIterator(projectList, child.output)
+            current_iterator = cache_generator(disk_partition.getData())
+            if(current_iterator.hasNext)
+            {
+              true
+            }
           }
         }
         false
