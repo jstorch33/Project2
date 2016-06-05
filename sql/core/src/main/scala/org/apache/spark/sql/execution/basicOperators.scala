@@ -138,23 +138,17 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
         * @return
         */
       private def fetchNextPartition(): Boolean = {
-        if(!disk_partition_iterator.hasNext)
+        
+        while(disk_partition_iterator.hasNext)    //i want to change this code more
         {
-          false
-        }
-
-          while(disk_partition_iterator.hasNext)    //i want to change this code more
+          disk_partition = disk_partition_iterator.next()
+          cache_generator = CS143Utils.generateCachingIterator(projectList, child.output)
+          current_iterator = cache_generator(disk_partition.getData())
+          if(current_iterator.hasNext)
           {
-            disk_partition = disk_partition_iterator.next()
-            cache_generator = CS143Utils.generateCachingIterator(projectList, child.output)
-            current_iterator = cache_generator(disk_partition.getData())
-            if(current_iterator.hasNext)
-            {
-              true
-            }
+            true
           }
-
-
+        }
       }
     }
 
