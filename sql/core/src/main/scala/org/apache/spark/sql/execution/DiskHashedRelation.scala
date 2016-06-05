@@ -225,8 +225,8 @@ private[sql] object DiskHashedRelation {
       partitionArray(key).insert(newRow)
     }
 
-    partitions.foreach(_.closeInput())
-    
+    partitionArray.foreach(_.closeInput())
+
     val newHash:GeneralDiskHashedRelation = new GeneralDiskHashedRelation(partitionArray)
     newHash
   }
