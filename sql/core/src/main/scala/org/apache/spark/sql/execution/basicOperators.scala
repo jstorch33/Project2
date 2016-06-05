@@ -105,7 +105,7 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
       var cache_generator: (Iterator[Row] => Iterator[Row]) = null
 
       def hasNext() = {
-        if (current_iterator.hasNext()) {
+        if (current_iterator.hasNext) {
           true
         }
         else if (current_iterator == null) {
@@ -143,7 +143,7 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
           {
             disk_partition = disk_partition_iterator.next()
             cache_generator = CS143Utils.generateCachingIterator(projectList, child.output)
-            current_iterator = cache_generator(diskPartition.getData())
+            current_iterator = cache_generator(disk_partition.getData())
             if(current_iterator.hasNext)
             {
               return true
