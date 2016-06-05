@@ -215,18 +215,18 @@ private[sql] object DiskHashedRelation {
               size: Int = 64,
               blockSize: Int = 64000) = {
     var partitionArray:Array[DiskPartition]= new Array[DiskPartition](size)
-    for(x <- 0 until size - 1)
+    for(x <- 0 to size-1)
       partitionArray(x) = new DiskPartition("temp" + Integer.toString(x), blockSize)
 
     while(input.hasNext)
     {
       val newRow: Row =  input.next()
-      val key: Int = keyGenerator(newRow).hashCode % size
+      val key: Int = keyGenerator.apply(newRow).hashCode % size
       partitionArray(key).insert(newRow)
     }
 
-    for (x <- 0 until size-1) {
-      partitionArray(x).closeInput
+    for (x <- 0 to size-1) {
+      partitionArray(x).closeInput()
     }
 
     val newHash:GeneralDiskHashedRelation = new GeneralDiskHashedRelation(partitionArray)
