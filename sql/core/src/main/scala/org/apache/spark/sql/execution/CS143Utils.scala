@@ -121,13 +121,15 @@ def getRowSize(data: Row): Array[Byte] = {
    * @return
    */
   def getUdfFromExpressions(expressions: Seq[Expression]): ScalaUdf = {
-    var newUdf : ScalaUdf = null
-
-    for(x <- expressions)
-      if(x.isInstanceOf[ScalaUdf])
-        newUdf = x.asInstanceOf[ScalaUdf]
-
-    newUdf
+    val udf = expressions.collect{case u: ScalaUdf => u}
+    if (!(udf.isEmpty))
+    {
+      udf.last
+    }
+    else
+    {
+      null
+    }
   }
 
   /**
