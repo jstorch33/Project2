@@ -122,7 +122,7 @@ private[sql] class DiskPartition (
       override def next() = {
         if(!currentIterator.hasNext)
         {
-          if(fetchNextChunk())
+          if(!fetchNextChunk())
             null
           else
           {
