@@ -144,7 +144,7 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
             disk_partition = disk_partition_iterator.next()
             cache_generator = CS143Utils.generateCachingIterator(projectList, child.output)
             current_iterator = cache_generator(diskPartition.getData())
-            if(current_iterator.hasNext
+            if(current_iterator.hasNext)
             {
               return true
             }
