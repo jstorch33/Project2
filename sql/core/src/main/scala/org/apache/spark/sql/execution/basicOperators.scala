@@ -72,12 +72,12 @@ case class CacheProject(projectList: Seq[Expression], child: SparkPlan) extends 
 }
 
 /**
- * A projection operator that is tailor to improve performance of UDF execution by using
- * external hashing.
- *
- * @param projectList
- * @param child
- */
+  * A projection operator that is tailor to improve performance of UDF execution by using
+  * external hashing.
+  *
+  * @param projectList
+  * @param child
+  */
 @DeveloperApi
 case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) extends UnaryNode {
   override def output = child.output
@@ -87,45 +87,78 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
   }
 
   /**
-   * This method takes an iterator as an input. It should first partition the whole input to disk.
-   * It should then read each partition from disk and construct do in-memory memoization over each
-   * partition to avoid recomputation of UDFs.
-   *
-   * @param input the input iterator
-   * @return the result of applying the projection
-   */
+    * This method takes an iterator as an input. It should first partition the whole input to disk.
+    * It should then read each partition from disk and construct do in-memory memoization over each
+    * partition to avoid recomputation of UDFs.
+    *
+    * @param input the input iterator
+    * @return the result of applying the projection
+    */
   def generateIterator(input: Iterator[Row]): Iterator[Row] = {
     // This is the key generator for the course-grained external hashing.
     val keyGenerator = CS143Utils.getNewProjection(projectList, child.output)
 
-    // IMPLEMENT ME
+    new Iterator[Row]
+    {
+      var current_iterator: Iterator[Row] = null
+      val disk_partition_iterator = DiskHashedRelation(input, keyGenerator).getIterator()
+      val disk_partition: DiskPartition = null
+      var cache_generator: (Iterator[Row] => Iterator[Row]) = null
+    }
 
     new Iterator[Row] {
       def hasNext() = {
-        // IMPLEMENT ME
+        if(current_iterator.hasNext)
+        {
+          true
+        }
+        else if(current_iterator == null)
+        {
+          fetchNextPartition()   //if there is a next partition it will return true, else false
+        }
+        else //if it gets here, must go to the next partition as well
+        {
+          fetchNextPartition()  //if there is a next partition it will return true, else false
+        }
         false
       }
 
       def next() = {
-        // IMPLEMENT ME
+        if(hasNext)
+          current_iteration.next()  //if hasNext, set it to next
         null
       }
 
       /**
-       * This fetches the next partition over which we will iterate or returns false if there are no more partitions
-       * over which we can iterate.
-       *
-       * @return
-       */
+        * This fetches the next partition over which we will iterate or returns false if there are no more partitions
+        * over which we can iterate.
+        *
+        * @return
+        */
       private def fetchNextPartition(): Boolean  = {
-        // IMPLEMENT ME
+        if(!disk_partition_iterator.hasNext)
+        {
+          false
+        }
+        else   //otherwise there is a next partition
+        {
+          while(disk_partition_iterator.hasNext)    //i want to change this code more
+          {
+            disk_partition = disk_partition_iterator.next()
+            cacheGenerator = CS143Utils.generateCachingIterator(projectList, child.output)
+            currentIterator = cacheGenerator(diskPartition.getData())
+            if(current_iterator.hasNext)
+            {
+              return true
+            }
+          }
+        }
         false
       }
     }
   }
 
 }
-
 /**
  * :: DeveloperApi ::
  */
