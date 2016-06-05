@@ -108,6 +108,15 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
       var cacheGenerator: (Iterator[Row] => Iterator[Row]) = null
 
       def hasNext() = {
+        var i: Boolean = currentIterator.hasNext
+
+        if (!i) {
+          i = diskPartitionsIterator.hasNext
+        }
+
+        i
+
+        /*
         if(current_iterator == null)
         {
           fetchNextPartition()   //if there is a next partition it will return true, else false
@@ -123,6 +132,7 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
             fetchNextPartition() //if there is a next partition it will return true, else false
           }
         }
+        */
       }
 
       def next() = {
