@@ -103,9 +103,9 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
       var current_iterator: Iterator[Row] = null
 
       // Note: here we use the default number of partitions and default blockSize
-      val disk_partition_iterator = DiskHashedRelation(input, keyGenerator).getIterator()
-      var disk_partition: DiskPartition = null
-      var cache_generator: (Iterator[Row] => Iterator[Row]) = null
+      val diskPartitionIterator = DiskHashedRelation(input, keyGenerator).getIterator()
+      var diskPartition: DiskPartition = null
+      var cacheGenerator: (Iterator[Row] => Iterator[Row]) = null
 
       def hasNext() = {
         if(current_iterator == null)
@@ -142,8 +142,7 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
         {
           false
         }
-        else   //otherwise there is a next partition
-        {
+
           while(disk_partition_iterator.hasNext)    //i want to change this code more
           {
             disk_partition = disk_partition_iterator.next()
@@ -154,8 +153,8 @@ case class PartitionProject(projectList: Seq[Expression], child: SparkPlan) exte
               true
             }
           }
-        }
-        false
+
+        
       }
     }
 
